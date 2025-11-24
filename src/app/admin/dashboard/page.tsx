@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import AdminSidebar from "@/app/components/admin/AdminSidebar";
 import AdminInventory from "@/app/components/admin/views/AdminInventory";
 import AdminOrders from "@/app/components/admin/views/AdminOrders";
@@ -9,32 +10,27 @@ import AdminDispatch from "@/app/components/admin/views/AdminDispatch";
 import AdminOverview from "@/app/components/admin/views/AdminOverview";
 import AdminProduction from "@/app/components/admin/views/AdminProduction";
 import AdminScrap from "@/app/components/admin/views/AdminScrap";
+import AdminRequests from "@/app/components/admin/views/AdminRequests";
 
 export default function AdminDashboard() {
     const router = useRouter();
-    const [checkingAuth, setCheckingAuth] = useState(true);
+    const { data: session, status } = useSession();
     const [currentView, setCurrentView] = useState("Overview");
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
     useEffect(() => {
-        // TODO: Replace with real auth check later
-        const isAuthed =
-            typeof window !== "undefined" &&
-            sessionStorage.getItem("isAdminAuthenticated") === "true";
+        if (status === "loading") return;
 
-        if (!isAuthed) {
-            router.replace("/admin");
-        } else {
-            setCheckingAuth(false);
-        }
-    }, [router]);
+        // Debugging: Log session
+        console.log("AdminDashboard Session:", session);
+        console.log("AdminDashboard Status:", status);
 
-    const handleLogout = () => {
-        sessionStorage.removeItem("isAdminAuthenticated");
-        router.replace("/admin");
-    };
+        // if (status === "unauthenticated" || (session?.user as any)?.role !== "admin") {
+        //     router.replace("/login");
+        // }
+    }, [session, status, router]);
 
-    if (checkingAuth) {
+    if (status === "loading") {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
@@ -46,6 +42,31 @@ export default function AdminDashboard() {
             </div>
         );
     }
+
+    if (status === "unauthenticated" || (session?.user as any)?.role !== "admin") {
+        return (
+            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-200 gap-4">
+                <h1 className="text-2xl font-bold text-red-500">Access Denied</h1>
+                <p>You are not authorized to view this page.</p>
+                <div className="bg-slate-900 p-4 rounded text-xs font-mono text-left">
+                    <p>Status: {status}</p>
+                    <p>Role: {(session?.user as any)?.role || "None"}</p>
+                    <p>User: {session?.user?.email || "None"}</p>
+                </div>
+                <button
+                    onClick={() => router.push("/login")}
+                    className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+                >
+                    Back to Login
+                </button>
+            </div>
+        );
+    }
+
+    const handleLogout = async () => {
+        sessionStorage.removeItem("isAdminAuthenticated");
+        await signOut({ callbackUrl: "/login" });
+    };
 
     const renderView = () => {
         switch (currentView) {
@@ -61,6 +82,8 @@ export default function AdminDashboard() {
                 return <AdminOrders />;
             case "Dispatch":
                 return <AdminDispatch />;
+            case "Requests":
+                return <AdminRequests />;
             default:
                 return <AdminOverview />;
         }

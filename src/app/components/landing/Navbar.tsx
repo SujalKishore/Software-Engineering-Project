@@ -3,52 +3,38 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { useSession, signOut } from "next-auth/react";
+import { Menu, X, ChevronRight, Sparkles } from "lucide-react";
 
 type NavbarProps = {
-  onScrollToModules?: () => void; // kept for future use, not required now
+  onScrollToModules?: () => void;
 };
 
 const Navbar: React.FC<NavbarProps> = () => {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthed, setIsAuthed] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
+
+  const isAuthed = status === "authenticated";
+  const userName = session?.user?.name || session?.user?.email || "User";
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
-
-    const checkAuth = () => {
-      if (typeof window === "undefined") return;
-      const authed = sessionStorage.getItem("isAuthenticated") === "true";
-      setIsAuthed(authed);
-      const storedName = sessionStorage.getItem("userName");
-      setUserName(storedName);
-    };
-
     window.addEventListener("scroll", handleScroll);
-    checkAuth();
-
-    // (optional) listen for changes from other tabs
-    window.addEventListener("storage", checkAuth);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("storage", checkAuth);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/login" });
     if (typeof window !== "undefined") {
       sessionStorage.removeItem("isAuthenticated");
       sessionStorage.removeItem("userName");
     }
-    setIsAuthed(false);
-    setUserName(null);
     setIsMenuOpen(false);
-    router.push("/login");
   };
 
   const handleGoToDashboard = () => {
@@ -56,166 +42,164 @@ const Navbar: React.FC<NavbarProps> = () => {
     router.push("/dashboard");
   };
 
-  const displayName = userName || "Admin";
+  const displayName = userName || "User";
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <header
-      className={`sticky top-0 z-50 backdrop-blur-md transition-all ${
-        isScrolled
-          ? "bg-slate-950/90 border-b border-slate-800"
-          : "bg-slate-900/40"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+        ? "bg-slate-950/70 backdrop-blur-xl border-b border-white/5 py-3"
+        : "bg-transparent py-5"
+        }`}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
         {/* Logo / Brand */}
-        <Link href="/" className="flex items-center gap-2">
-          {/* Icon instead of BM text */}
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-400">
-            {/* Simple brake-disc style icon */}
-            <div className="relative h-4 w-4 rounded-full bg-slate-950/90">
-              <div className="absolute inset-1 rounded-full border border-slate-600" />
-              <div className="absolute left-1 top-1 h-1 w-1 rounded-full bg-slate-600" />
-            </div>
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 shadow-lg shadow-orange-500/20 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+            <Sparkles className="relative z-10 text-white h-5 w-5" />
           </div>
-          <div className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 sm:block">
-            Brake Dashboard
+          <div className="flex flex-col">
+            <span className="text-sm font-bold tracking-wide text-white uppercase">Brake</span>
+            <span className="text-[10px] font-medium tracking-[0.2em] text-slate-400 group-hover:text-orange-400 transition-colors">Analytics</span>
           </div>
         </Link>
 
         {/* Desktop nav links */}
-        <nav className="hidden items-center gap-6 md:flex">
-          <Link
-            href="/about"
-            className="text-[11px] font-medium text-slate-300 transition hover:text-orange-300"
-          >
-            About
-          </Link>
-          <Link
-            href="/docs"
-            className="text-[11px] font-medium text-slate-300 transition hover:text-orange-300"
-          >
-            Docs
-          </Link>
+        <nav className="hidden items-center gap-1 md:flex rounded-full border border-white/5 bg-white/5 p-1 backdrop-blur-md">
+          {["About", "Docs"].map((item) => (
+            <Link
+              key={item}
+              href={`/${item.toLowerCase()}`}
+              className="relative px-5 py-2 text-xs font-medium text-slate-300 transition-colors hover:text-white"
+            >
+              {item}
+            </Link>
+          ))}
         </nav>
 
         {/* Desktop right side */}
-        <div className="hidden items-center gap-3 text-[11px] md:flex">
+        <div className="hidden items-center gap-4 md:flex">
           {isAuthed ? (
-            <>
-              {/* User chip – click to go back to dashboard */}
+            <div className="flex items-center gap-3">
               <button
                 onClick={handleGoToDashboard}
-                className="flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1.5 font-medium text-slate-200 transition hover:border-orange-500 hover:text-orange-300"
+                className="group flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/50 pl-2 pr-4 py-1.5 transition-all hover:border-orange-500/30 hover:bg-slate-900"
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-400 text-[11px] font-semibold text-slate-950">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-[10px] font-bold text-white shadow-sm">
                   {initial}
                 </div>
-                <span>{displayName}</span>
-                <span className="text-slate-500">· Dashboard</span>
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-xs font-medium text-slate-300 group-hover:text-white transition-colors">{displayName}</span>
+                  {(session?.user as any)?.googleId && (
+                    <span className="text-[10px] text-slate-500 group-hover:text-slate-400 transition-colors">
+                      ID: {(session?.user as any).googleId}
+                    </span>
+                  )}
+                </div>
               </button>
 
-              {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="rounded-md border border-slate-700 bg-slate-900/70 px-3 py-1.5 font-medium text-slate-200 transition hover:border-red-500 hover:text-red-300"
+                className="text-xs font-medium text-slate-500 hover:text-red-400 transition-colors"
               >
-                Logout
+                Sign Out
               </button>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center gap-6">
               <Link
                 href="/login"
-                className="rounded-md border border-slate-700 bg-slate-900/70 px-3 py-1.5 font-medium text-slate-200 transition hover:border-orange-500 hover:text-orange-300"
+                className="text-xs font-medium text-slate-400 hover:text-white transition-colors"
               >
-                Login
+                Log In
               </Link>
               <Link
-                href="/register"
-                className="rounded-md bg-orange-500 px-3 py-1.5 font-semibold text-slate-950 shadow-md shadow-orange-500/30 transition hover:bg-orange-400"
+                href="/login?mode=register"
+                className="group relative overflow-hidden rounded-full bg-white px-6 py-2.5 transition-transform hover:scale-105 active:scale-95"
               >
-                Register
+                <span className="absolute inset-0 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <span className="relative flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-950 group-hover:text-white transition-colors">
+                  Register
+                  <ChevronRight size={12} />
+                </span>
               </Link>
-            </>
+            </div>
           )}
         </div>
 
         {/* Mobile menu button */}
         <button
           onClick={toggleMenu}
-          className="inline-flex items-center justify-center rounded-md border border-slate-700 bg-slate-900/70 p-1.5 md:hidden"
-          aria-label="Toggle navigation menu"
+          className="rounded-full bg-white/5 p-2 text-slate-400 hover:bg-white/10 hover:text-white md:hidden transition-colors"
         >
-          <span className="sr-only">Open menu</span>
-          <div className="space-y-0.5">
-            <span className="block h-0.5 w-4 rounded bg-slate-200" />
-            <span className="block h-0.5 w-4 rounded bg-slate-200" />
-            <span className="block h-0.5 w-4 rounded bg-slate-200" />
-          </div>
+          {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
       {/* Mobile dropdown menu */}
-      {isMenuOpen && (
-        <div className="border-t border-slate-800 bg-slate-950 md:hidden">
-          <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 text-[12px]">
-            <Link
-              href="/about"
-              className="rounded-md px-2 py-1.5 text-slate-200 hover:bg-slate-900 hover:text-orange-300"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              href="/docs"
-              className="rounded-md px-2 py-1.5 text-slate-200 hover:bg-slate-900 hover:text-orange-300"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Docs
-            </Link>
-
-            {isAuthed ? (
-              <>
-                <button
-                  onClick={handleGoToDashboard}
-                  className="mt-2 flex items-center gap-2 rounded-md border border-slate-700 bg-slate-900/80 px-3 py-1.5 text-left font-medium text-slate-200 hover:border-orange-500 hover:text-orange-300"
-                >
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-400 text-[11px] font-semibold text-slate-950">
-                    {initial}
-                  </div>
-                  <span>{displayName}</span>
-                  <span className="text-slate-500">· Dashboard</span>
-                </button>
-
-                <button
-                  onClick={handleLogout}
-                  className="mt-2 rounded-md border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-center font-medium text-slate-200 hover:border-red-500 hover:text-red-300"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <div className="mt-2 flex gap-2">
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden border-t border-white/5 bg-slate-950/95 backdrop-blur-xl md:hidden"
+          >
+            <div className="flex flex-col gap-1 p-4">
+              {["About", "Docs"].map((item) => (
                 <Link
-                  href="/login"
-                  className="flex-1 rounded-md border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-center font-medium text-slate-200 hover:border-orange-500 hover:text-orange-300"
+                  key={item}
+                  href={`/${item.toLowerCase()}`}
+                  className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Login
+                  {item}
                 </Link>
-                <Link
-                  href="/register"
-                  className="flex-1 rounded-md bg-orange-500 px-3 py-1.5 text-center font-semibold text-slate-950 hover:bg-orange-400"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Register
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              ))}
+
+              <div className="my-2 border-t border-white/5" />
+
+              {isAuthed ? (
+                <>
+                  <button
+                    onClick={handleGoToDashboard}
+                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white"
+                  >
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white">
+                      {initial}
+                    </div>
+                    Dashboard
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-lg px-4 py-3 text-left text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <div className="flex flex-col gap-3 mt-2">
+                  <Link
+                    href="/login"
+                    className="rounded-lg border border-white/10 px-4 py-3 text-center text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    href="/login?mode=register"
+                    className="rounded-lg bg-gradient-to-r from-orange-500 to-amber-600 px-4 py-3 text-center text-sm font-bold text-white shadow-lg shadow-orange-500/20"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Register
+                  </Link>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

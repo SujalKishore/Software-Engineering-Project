@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Navbar from "@/app/components/landing/Navbar";
 import Footer from "@/app/components/landing/Footer";
 import QuickAccessModules from "../components/dashboard/QuickAccessModules";
@@ -16,27 +17,21 @@ import Dispatch from "../components/dashboard/views/Dispatch";
 
 export default function DashboardHome() {
   const router = useRouter();
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const { data: session, status } = useSession();
   const [currentView, setCurrentView] = useState("Overview");
 
   useEffect(() => {
-    const isAuthed =
-      typeof window !== "undefined" &&
-      sessionStorage.getItem("isAuthenticated") === "true";
-
-    if (!isAuthed) {
+    if (status === "unauthenticated") {
       router.replace("/login");
-    } else {
-      setCheckingAuth(false);
     }
-  }, [router]);
+  }, [status, router]);
 
-  if (checkingAuth) {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
-          <p className="text-xs text-slate-400">Checking access…</p>
+          <p className="text-xs text-slate-400">Checking access...</p>
         </main>
         <Footer />
       </div>
@@ -119,31 +114,43 @@ export default function DashboardHome() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.15),rgba(255,255,255,0))]" />
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none" />
+
       <Navbar />
 
-      <main className="flex-1">
+      <main className="flex-1 pt-24 pb-12 relative z-10 px-4 sm:px-6 lg:px-8">
         {/* Hero / header */}
-        <section className="border-b border-slate-800 bg-slate-950/90">
-          <div className="mx-auto max-w-6xl px-4 py-8">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-300">
-              {headerConfig.breadcrumb}
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold sm:text-3xl md:text-4xl">
-              {headerConfig.title}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-300">
-              {headerConfig.description}
-            </p>
+        <section className="mx-auto max-w-7xl mb-8">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/50 p-8 backdrop-blur-xl">
+            <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-orange-500/20 blur-3xl pointer-events-none" />
+
+            <div className="relative z-10">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-400 mb-2">
+                {headerConfig.breadcrumb}
+              </p>
+              <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl mb-3">
+                {headerConfig.title}
+              </h1>
+              <p className="max-w-3xl text-sm text-slate-400 leading-relaxed">
+                {headerConfig.description}
+              </p>
+            </div>
           </div>
         </section>
 
-        <QuickAccessModules
-          activeView={currentView}
-          onNavigate={setCurrentView}
-        />
+        <div className="mx-auto max-w-7xl">
+          <QuickAccessModules
+            activeView={currentView}
+            onNavigate={setCurrentView}
+          />
 
-        {renderView()}
+          <div className="mt-8">
+            {renderView()}
+          </div>
+        </div>
       </main>
 
       <Footer />

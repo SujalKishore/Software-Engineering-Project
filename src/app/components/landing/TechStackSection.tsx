@@ -1,71 +1,41 @@
 import React from "react";
-
-const tools = [
-  {
-    name: "Power BI",
-    use: "Rich visuals, DAX for measures, Row-level security.",
-  },
-  {
-    name: "Tableau",
-    use: "Interactive dashboards, story points, strong drag-and-drop.",
-  },
-  {
-    name: "Google Data Studio",
-    use: "Free, easy sharing via links, integrates with Google Sheets.",
-  },
-];
+import AnimatedSection from "../ui/AnimatedSection";
 
 const TechStackSection: React.FC = () => {
   return (
-    <section className="bg-slate-950 px-4 py-12 text-slate-50 md:py-16">
-      <div className="mx-auto max-w-6xl">
-        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-          Visualization & Tech Stack
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm text-slate-300">
-          Choose any of the following tools to build your dashboards. The data
-          model remains the same; only the visualization layer changes.
-        </p>
+    <section className="border-y border-slate-900 bg-slate-950/50 py-12">
+      <AnimatedSection className="mx-auto max-w-6xl px-6">
+        <div className="flex flex-col items-center justify-center gap-8 text-center md:flex-row md:justify-between md:text-left">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-50">
+              Powered by Modern Tech
+            </h2>
+            <p className="text-sm text-slate-400">
+              Built for speed, scalability, and real-time insights.
+            </p>
+          </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {tools.map((tool) => (
-            <div
-              key={tool.name}
-              className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4"
-            >
-              <div className="mb-2 text-sm font-semibold text-orange-300">
-                {tool.name}
-              </div>
-              <p className="text-xs text-slate-200">{tool.use}</p>
+          <div className="flex flex-wrap justify-center gap-8 opacity-70 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded bg-[#F2C811] flex items-center justify-center font-bold text-black text-xs">PBI</div>
+              <span className="font-medium text-slate-300">Power BI</span>
             </div>
-          ))}
-        </div>
-
-        <div className="mt-6 grid gap-4 text-xs text-slate-200 md:grid-cols-2">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <h3 className="text-sm font-semibold text-slate-50">
-              Data Sources
-            </h3>
-            <ul className="mt-2 space-y-1">
-              <li>• ERP exports (CSV/Excel)</li>
-              <li>• Production logs (shift-wise)</li>
-              <li>• Inventory / stores data</li>
-              <li>• Dispatch registers / transport data</li>
-            </ul>
-          </div>
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <h3 className="text-sm font-semibold text-slate-50">
-              Interactivity to implement
-            </h3>
-            <ul className="mt-2 space-y-1">
-              <li>• Filters for date, line, product, and customer</li>
-              <li>• Slicers for region, shift, and transporter</li>
-              <li>• Drill-down from summary KPIs → detail tables</li>
-              <li>• Tooltips with extra information on hover</li>
-            </ul>
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded bg-[#E97627] flex items-center justify-center font-bold text-white text-xs">TAB</div>
+              <span className="font-medium text-slate-300">Tableau</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded bg-[#4285F4] flex items-center justify-center font-bold text-white text-xs">GDS</div>
+              <span className="font-medium text-slate-300">Data Studio</span>
+            </div>
+            <div className="h-8 w-px bg-slate-800 hidden md:block" />
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded bg-black border border-white/20 flex items-center justify-center font-bold text-white text-xs">N</div>
+              <span className="font-medium text-slate-300">Next.js</span>
+            </div>
           </div>
         </div>
-      </div>
+      </AnimatedSection>
     </section>
   );
 };

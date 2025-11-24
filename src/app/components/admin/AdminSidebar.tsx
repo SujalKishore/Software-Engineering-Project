@@ -22,6 +22,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { name: "Inventory", view: "Inventory", icon: "📦" },
         { name: "Orders", view: "Orders", icon: "🛒" },
         { name: "Dispatch", view: "Dispatch", icon: "🚚" },
+        { name: "Requests", view: "Requests", icon: "🔔" },
     ];
 
     const sidebarClasses = `
@@ -68,8 +69,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                 if (onMobileClose) onMobileClose();
                             }}
                             className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-3 ${activeView === item.view
-                                    ? "bg-gradient-to-r from-orange-500/20 to-orange-500/5 text-orange-300 border border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]"
-                                    : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent"
+                                ? "bg-gradient-to-r from-orange-500/20 to-orange-500/5 text-orange-300 border border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]"
+                                : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent"
                                 }`}
                         >
                             <span className="text-lg">{item.icon}</span>

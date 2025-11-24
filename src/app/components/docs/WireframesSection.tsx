@@ -1,94 +1,81 @@
+"use client";
 import React from "react";
+import AnimatedSection from "../ui/AnimatedSection";
+import { motion } from "framer-motion";
 
 const wireframes = [
   {
-    title: "Dashboard Home",
-    description:
-      "High-level KPIs for production, scrap %, open orders, inventory health, and dispatch performance.",
-    note: "Shows navigation to all five modules and key summary tiles.",
-    imageUrl: "", // add `/wireframes/dashboard-home.png` later if you have
+    title: "Executive Dashboard",
+    desc: "High-level KPIs for plant managers.",
+    color: "bg-blue-500",
   },
   {
-    title: "Daily Production Dashboard",
-    description:
-      "Line-wise and shift-wise production charts, trend over time, and detailed table with filters.",
-    note: "Includes date, line, shift, and product filters.",
-    imageUrl: "",
+    title: "Production Line View",
+    desc: "Detailed hourly output tracking.",
+    color: "bg-orange-500",
   },
   {
-    title: "Scrap & Defects Dashboard",
-    description:
-      "Scrap % by line, top defects, Pareto chart, and drill-down into defect records.",
-    note: "Helps identify root causes and problem lines.",
-    imageUrl: "",
-  },
-  {
-    title: "Customer Orders & Dispatch Dashboard",
-    description:
-      "Open orders, on-time delivery %, region-wise dispatch, and dispatch status.",
-    note: "Highlights delayed or at-risk orders.",
-    imageUrl: "",
+    title: "Scrap Analysis",
+    desc: "Pareto charts for defect root causes.",
+    color: "bg-red-500",
   },
 ];
 
 const WireframesSection: React.FC = () => {
   return (
-    <section
-      id="wireframes"
-      className="bg-slate-950 px-4 py-12 text-slate-50 md:py-16"
-    >
-      <div className="mx-auto max-w-6xl">
-        <header>
-          <h2 className="text-2xl font-semibold md:text-3xl">
-            Wireframes & Mockups
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm text-slate-300">
-            Wireframes define the layout of key dashboards before implementing
-            them in tools like Power BI, Tableau, or Google Data Studio. These
-            can be created in Figma, on paper, or directly using low-fidelity
-            visuals in the BI tool.
-          </p>
-        </header>
-
-        <div className="mt-8 grid gap-5 md:grid-cols-2">
-          {wireframes.map((wf) => (
-            <article
-              key={wf.title}
-              className="flex flex-col rounded-2xl border border-slate-800 bg-slate-900/70 p-4"
-            >
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold text-slate-50">
-                  {wf.title}
-                </h3>
-                <p className="mt-2 text-xs text-slate-300">{wf.description}</p>
-                <p className="mt-1 text-[11px] text-slate-400">{wf.note}</p>
-              </div>
-
-              {/* Placeholder for image (optional) */}
-              {wf.imageUrl ? (
-                <div className="mt-3 overflow-hidden rounded-xl border border-slate-700 bg-slate-900">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={wf.imageUrl}
-                    alt={wf.title}
-                    className="h-40 w-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="mt-3 flex h-28 items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-900 text-[11px] text-slate-500">
-                  Wireframe / mockup image placeholder
-                </div>
-              )}
-            </article>
-          ))}
+    <section className="bg-slate-950 px-4 py-24">
+      <AnimatedSection className="mx-auto max-w-6xl">
+        <div className="mb-16 text-center">
+          <h2 className="text-3xl font-bold text-slate-50">UI Wireframes</h2>
+          <p className="mt-2 text-slate-400">Early design concepts and layouts</p>
         </div>
 
-        <p className="mt-6 text-[11px] text-slate-400">
-          Tip: During viva, you can open this section and then switch to your
-          actual Power BI/Tableau/Google Data Studio dashboards to show how the
-          final implementation matches the initial wireframes.
-        </p>
-      </div>
+        <div className="grid gap-8 md:grid-cols-3">
+          {wireframes.map((wf, i) => (
+            <motion.div
+              key={i}
+              whileHover={{
+                scale: 1.05,
+                rotateY: 5,
+                rotateX: -5,
+                z: 50
+              }}
+              style={{ transformStyle: "preserve-3d" }}
+              className="group relative aspect-[4/3] cursor-pointer rounded-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl transition-all"
+            >
+              {/* Mock UI Header */}
+              <div className="mb-4 flex items-center gap-2 border-b border-slate-800 pb-2">
+                <div className="flex gap-1.5">
+                  <div className="h-2.5 w-2.5 rounded-full bg-red-500/50" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/50" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-green-500/50" />
+                </div>
+                <div className="mx-auto h-2 w-32 rounded-full bg-slate-800" />
+              </div>
+
+              {/* Mock UI Body */}
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <div className="h-20 w-1/3 rounded-lg bg-slate-800/50" />
+                  <div className="h-20 w-1/3 rounded-lg bg-slate-800/50" />
+                  <div className="h-20 w-1/3 rounded-lg bg-slate-800/50" />
+                </div>
+                <div className="flex gap-3">
+                  <div className="h-32 w-2/3 rounded-lg bg-slate-800/50" />
+                  <div className="h-32 w-1/3 rounded-lg bg-slate-800/50" />
+                </div>
+              </div>
+
+              {/* Overlay Content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-slate-950/80 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
+                <div className={`mb-2 h-12 w-12 rounded-full ${wf.color} opacity-80 blur-xl`} />
+                <h3 className="relative z-10 text-xl font-bold text-white">{wf.title}</h3>
+                <p className="relative z-10 text-sm text-slate-300">{wf.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </AnimatedSection>
     </section>
   );
 };

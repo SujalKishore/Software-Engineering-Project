@@ -1,119 +1,56 @@
+"use client";
 import React from "react";
+import AnimatedSection from "../ui/AnimatedSection";
+import { motion } from "framer-motion";
+
+const techs = [
+  { name: "Next.js", x: 50, y: 20, color: "bg-white" },
+  { name: "TypeScript", x: 20, y: 50, color: "bg-blue-500" },
+  { name: "Tailwind", x: 80, y: 50, color: "bg-cyan-400" },
+  { name: "Prisma", x: 35, y: 80, color: "bg-emerald-500" },
+  { name: "PostgreSQL", x: 65, y: 80, color: "bg-blue-300" },
+];
 
 const DocsTechStackSection: React.FC = () => {
   return (
-    <section
-      id="tech-stack"
-      className="bg-slate-950 px-4 py-12 text-slate-50 md:py-16"
-    >
-      <div className="mx-auto max-w-6xl space-y-6">
-        <header>
-          <h2 className="text-2xl font-semibold md:text-3xl">Tech Stack</h2>
-          <p className="mt-2 max-w-2xl text-sm text-slate-300">
-            The project combines a modern web front-end with industry-standard
-            BI tools to deliver rich analytics dashboards.
-          </p>
-        </header>
-
-        <div className="grid gap-5 md:grid-cols-2">
-          {/* Web app stack */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <h3 className="text-sm font-semibold text-slate-50">
-              Web Application (Frontend)
-            </h3>
-            <ul className="mt-3 space-y-1 text-xs text-slate-300">
-              <li>
-                • <span className="font-semibold text-orange-300">Next.js</span>{" "}
-                – React-based framework for routing, layouts, and server/client
-                components.
-              </li>
-              <li>
-                •{" "}
-                <span className="font-semibold text-orange-300">
-                  TypeScript
-                </span>{" "}
-                – Adds type safety and maintainability.
-              </li>
-              <li>
-                •{" "}
-                <span className="font-semibold text-orange-300">
-                  Tailwind CSS
-                </span>{" "}
-                – Utility-first styling for fast, consistent UI.
-              </li>
-              <li>
-                • Authentication UI – Login, registration, and role-based views.
-              </li>
-            </ul>
-          </div>
-
-          {/* BI tools stack */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <h3 className="text-sm font-semibold text-slate-50">
-              Analytics & Dashboards (BI Layer)
-            </h3>
-            <ul className="mt-3 space-y-1 text-xs text-slate-300">
-              <li>
-                •{" "}
-                <span className="font-semibold text-orange-300">Power BI</span>{" "}
-                – DAX measures, interactive reports, and published dashboards.
-              </li>
-              <li>
-                • <span className="font-semibold text-orange-300">Tableau</span>{" "}
-                – Alternative for advanced visualization and storytelling.
-              </li>
-              <li>
-                •{" "}
-                <span className="font-semibold text-orange-300">
-                  Google Data Studio
-                </span>{" "}
-                – Option for web-based, shareable reports.
-              </li>
-              <li>
-                • Data is sourced from CSV/Excel exports of ERP / production
-                logs.
-              </li>
-            </ul>
-          </div>
+    <section className="bg-slate-950 px-4 py-24">
+      <AnimatedSection className="mx-auto max-w-4xl text-center">
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-slate-50">Technology Stack</h2>
+          <p className="mt-2 text-slate-400">The modern tools powering our platform</p>
         </div>
 
-        <div className="grid gap-5 text-xs text-slate-300 md:grid-cols-2">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <h3 className="text-sm font-semibold text-slate-50">
-              Architecture (High-level)
-            </h3>
-            <ul className="mt-2 space-y-1">
-              <li>• Users access the Next.js web app via browser.</li>
-              <li>• Web app links to or embeds dashboards from BI tools.</li>
-              <li>
-                • BI tools connect to structured datasets (Production, Scrap,
-                etc.).
-              </li>
-              <li>
-                • Admin periodically uploads/refreshes data from ERP exports.
-              </li>
-            </ul>
-          </div>
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <h3 className="text-sm font-semibold text-slate-50">
-              Possible Extensions
-            </h3>
-            <ul className="mt-2 space-y-1">
-              <li>
-                • Connect directly to a production database (SQL Server, etc.).
-              </li>
-              <li>
-                • Implement real-time streaming data (IoT sensors, machine
-                data).
-              </li>
-              <li>
-                • Add alerting for high scrap %, low inventory, delayed orders.
-              </li>
-              <li>• Integrate role-based access with organization SSO.</li>
-            </ul>
-          </div>
+        <div className="relative mx-auto h-[400px] w-full max-w-[600px] rounded-full bg-slate-900/30 border border-slate-800">
+          {/* Connecting Lines */}
+          <svg className="absolute inset-0 h-full w-full">
+            <line x1="50%" y1="20%" x2="20%" y2="50%" stroke="rgba(255,255,255,0.1)" strokeWidth="2" />
+            <line x1="50%" y1="20%" x2="80%" y2="50%" stroke="rgba(255,255,255,0.1)" strokeWidth="2" />
+            <line x1="20%" y1="50%" x2="35%" y2="80%" stroke="rgba(255,255,255,0.1)" strokeWidth="2" />
+            <line x1="80%" y1="50%" x2="65%" y2="80%" stroke="rgba(255,255,255,0.1)" strokeWidth="2" />
+            <line x1="35%" y1="80%" x2="65%" y2="80%" stroke="rgba(255,255,255,0.1)" strokeWidth="2" />
+          </svg>
+
+          {/* Nodes */}
+          {techs.map((tech, i) => (
+            <motion.div
+              key={i}
+              initial={{ scale: 0 }}
+              whileInView={{ scale: 1 }}
+              transition={{ delay: i * 0.1, type: "spring" }}
+              whileHover={{ scale: 1.2 }}
+              className="absolute flex flex-col items-center gap-2"
+              style={{ left: `${tech.x}%`, top: `${tech.y}%`, transform: "translate(-50%, -50%)" }}
+            >
+              <div className={`h-12 w-12 rounded-full ${tech.color} shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center justify-center text-slate-950 font-bold text-xs`}>
+                {tech.name.slice(0, 2)}
+              </div>
+              <span className="rounded-md bg-slate-900/80 px-2 py-1 text-xs font-medium text-slate-300 backdrop-blur-sm">
+                {tech.name}
+              </span>
+            </motion.div>
+          ))}
         </div>
-      </div>
+      </AnimatedSection>
     </section>
   );
 };

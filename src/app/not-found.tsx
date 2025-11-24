@@ -1,69 +1,125 @@
+"use client";
+
 import Link from "next/link";
 import Navbar from "@/app/components/landing/Navbar";
 import Footer from "@/app/components/landing/Footer";
+import { motion } from "framer-motion";
+import { AlertTriangle, WifiOff, RefreshCw, Loader2 } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col overflow-hidden relative">
       <Navbar />
 
-      <main className="flex-1 flex items-center justify-center px-4">
-        <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-          {/* Icon + 404 */}
-          <div className="relative mb-6 flex h-24 w-24 items-center justify-center">
-            {/* Outer glowing ring */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500/40 via-amber-400/30 to-transparent blur-xl" />
+      {/* Glitch Background Effect */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10" />
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ x: "-100%" }}
+            animate={{ x: "200%" }}
+            transition={{
+              duration: Math.random() * 5 + 5,
+              repeat: Infinity,
+              ease: "linear",
+              delay: Math.random() * 5,
+            }}
+            className="absolute h-[1px] w-full bg-gradient-to-r from-transparent via-orange-500/50 to-transparent"
+            style={{ top: `${Math.random() * 100}%` }}
+          />
+        ))}
+      </div>
 
-            {/* Inner brake-disc style icon */}
-            <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-slate-900 border border-slate-700 shadow-lg shadow-black/40">
-              <div className="h-14 w-14 rounded-full border border-slate-600 bg-slate-950 relative">
-                <div className="absolute inset-2 rounded-full border border-slate-700" />
-                <div className="absolute left-2 top-2 h-1.5 w-1.5 rounded-full bg-slate-500" />
-              </div>
-              <span className="absolute bottom-1 text-[10px] font-semibold tracking-[0.18em] text-orange-300 uppercase">
+      <main className="flex-1 flex items-center justify-center px-4 pt-64 pb-20 relative z-10">
+        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+
+          {/* Glitch 404 Text with Buffering Circle */}
+          <div className="relative mb-12 flex items-center justify-center">
+            {/* Buffering Circle */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              className="absolute h-64 w-64 rounded-full border-2 border-dashed border-slate-800 opacity-50"
+            />
+            <motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+              className="absolute h-48 w-48 rounded-full border border-slate-800 opacity-30"
+            />
+
+            <div className="relative z-10">
+              <h1 className="text-9xl font-black tracking-tighter text-slate-500 select-none">
                 404
-              </span>
+              </h1>
+              <motion.div
+                animate={{
+                  x: [-2, 2, -1, 0],
+                  y: [1, -1, 0],
+                }}
+                transition={{
+                  duration: 0.2,
+                  repeat: Infinity,
+                  repeatDelay: 3,
+                }}
+                className="absolute inset-0 text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 mix-blend-overlay"
+              >
+                404
+              </motion.div>
             </div>
           </div>
 
-          <h1 className="text-2xl font-semibold sm:text-3xl md:text-4xl">
-            Route not found.
-          </h1>
-          <p className="mt-3 max-w-xl text-sm text-slate-300">
-            Looks like this path isn&apos;t part of the{" "}
-            <span className="font-semibold text-orange-300">
-              Brake Manufacturing Dashboard
-            </span>{" "}
-            layout. Maybe you followed an outdated link or mis-typed the URL.
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex items-center gap-2 mb-6 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-1.5 text-xs font-medium text-red-400"
+          >
+            <WifiOff size={14} />
+            <span>SIGNAL_LOST</span>
+          </motion.div>
 
-          {/* Fun line tied to project */}
-          <p className="mt-2 text-[11px] text-slate-500">
-            Don&apos;t worry — it&apos;s just a broken route, not a broken brake
-            line. 🛠️
-          </p>
+          <motion.h2
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-3xl font-bold sm:text-4xl mb-4 text-white"
+          >
+            System Failure
+          </motion.h2>
 
-          {/* Actions */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="max-w-md text-sm text-slate-400 mb-10 leading-relaxed"
+          >
+            The requested module could not be located. It may have been decommissioned or moved to a secure sector.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex flex-wrap items-center justify-center gap-4"
+          >
             <Link
               href="/"
-              className="rounded-md bg-orange-500 px-4 py-2 font-semibold text-slate-950 shadow-md shadow-orange-500/30 transition hover:bg-orange-400"
+              className="group flex items-center gap-2 rounded-lg bg-orange-500 px-6 py-3 text-sm font-bold text-slate-950 transition-all hover:bg-orange-400 hover:scale-105"
             >
-              ⤶ Back to Landing
+              <RefreshCw size={16} className="transition-transform group-hover:rotate-180" />
+              Re-establish Connection
             </Link>
+
             <Link
               href="/dashboard"
-              className="rounded-md border border-slate-700 bg-slate-900/70 px-4 py-2 font-medium text-slate-200 transition hover:border-orange-500 hover:text-orange-300"
+              className="group flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-6 py-3 text-sm font-medium text-slate-300 transition-all hover:border-orange-500/50 hover:text-white"
             >
-              Go to Dashboard
+              <AlertTriangle size={16} />
+              Emergency Protocol
             </Link>
-            <Link
-              href="/docs"
-              className="rounded-md border border-slate-800 px-4 py-2 font-medium text-slate-300 transition hover:border-orange-500 hover:text-orange-200"
-            >
-              View Project Docs
-            </Link>
-          </div>
+          </motion.div>
+
         </div>
       </main>
 

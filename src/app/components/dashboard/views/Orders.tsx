@@ -12,6 +12,7 @@ import {
     Cell,
 } from "recharts";
 import { exportToCSV } from "@/app/utils/csvExport";
+import { Search, Calendar, Filter, Download, ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
 
 interface Order {
     id: string;
@@ -29,34 +30,55 @@ interface Order {
 const Orders: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [total, setTotal] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const [searchQuery, setSearchQuery] = useState("");
     const [customer, setCustomer] = useState("All");
     const [region, setRegion] = useState("All");
     const [status, setStatus] = useState("All");
-    const [dueDate, setDueDate] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
+    const fetchOrders = async () => {
+        try {
+            setLoading(true);
+            // Fetching all for client-side filtering/pagination for now
+            const res = await fetch(`/api/orders?limit=500&offset=0`);
+            const data = await res.json();
+            setOrders(data.data || []);
+            setTotal(data.total || 0);
+        } catch (error) {
+            console.error("Failed to fetch orders", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const res = await fetch("/api/orders");
-                const data = await res.json();
-                setOrders(data);
-                setLoading(false);
-            } catch (error) {
-                console.error("Failed to fetch orders", error);
-                setLoading(false);
-            }
-        };
         fetchOrders();
     }, []);
 
     // Filter Logic
     const filteredOrders = orders.filter((order) => {
+        const matchesSearch =
+            order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            order.product.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCustomer = customer === "All" || order.customer === customer;
         const matchesRegion = region === "All" || order.region === region;
         const matchesStatus = status === "All" || order.status === status;
-        const matchesDate = dueDate ? order.dueDate === dueDate : true;
-        return matchesCustomer && matchesRegion && matchesStatus && matchesDate;
+        const matchesStartDate = startDate ? new Date(order.bookedOn) >= new Date(startDate) : true;
+        const matchesEndDate = endDate ? new Date(order.bookedOn) <= new Date(endDate) : true;
+
+        return matchesSearch && matchesCustomer && matchesRegion && matchesStatus && matchesStartDate && matchesEndDate;
     });
+
+    // Pagination Logic
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
     // Metrics
     const openOrders = filteredOrders.filter(o => o.status === "Open").length;
@@ -64,11 +86,22 @@ const Orders: React.FC = () => {
     const totalOrders = filteredOrders.length;
 
     // Charts Data
-    const statusData = [
-        { name: "Open", value: openOrders },
-        { name: "Completed", value: completedOrders },
-    ];
-    const STATUS_COLORS = ["#f97316", "#10b981"];
+    // Charts Data
+    const allStatuses = ["Open", "In Progress", "Completed", "On Hold", "Cancelled", "Returned"];
+    const statusColors: Record<string, string> = {
+        "Open": "#3b82f6", // Blue
+        "In Progress": "#f59e0b", // Amber
+        "Completed": "#10b981", // Emerald
+        "On Hold": "#6366f1", // Indigo
+        "Cancelled": "#ef4444", // Red
+        "Returned": "#ec4899", // Pink
+    };
+
+    const statusData = allStatuses.map(status => ({
+        name: status,
+        value: filteredOrders.filter(o => o.status === status).length,
+        color: statusColors[status]
+    })).filter(item => item.value > 0);
 
     const regionData = Array.from(new Set(orders.map(o => o.region))).map(r => ({
         name: r,
@@ -78,79 +111,90 @@ const Orders: React.FC = () => {
     const uniqueCustomers = Array.from(new Set(orders.map(o => o.customer)));
     const uniqueRegions = Array.from(new Set(orders.map(o => o.region)));
 
-    if (loading) return <div className="p-8 text-slate-400">Loading Orders...</div>;
+    if (loading) return (
+        <div className="flex h-64 items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-700 border-t-orange-500"></div>
+        </div>
+    );
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Filters */}
-            <section className="border-b border-slate-800 bg-slate-950">
-                <div className="mx-auto max-w-6xl px-4 py-4">
+            <section className="rounded-3xl border border-white/10 bg-slate-900/50 p-6 backdrop-blur-xl">
+                <div className="flex flex-col gap-6">
                     <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div className="flex flex-wrap gap-3 text-xs">
-                            <div>
-                                <p className="mb-1 text-[11px] text-slate-400">Customer</p>
-                                <select
-                                    value={customer}
-                                    onChange={(e) => setCustomer(e.target.value)}
-                                    className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-100 outline-none focus:border-orange-400"
-                                >
-                                    <option>All</option>
-                                    {uniqueCustomers.map(c => <option key={c}>{c}</option>)}
-                                </select>
+                        <div className="flex flex-wrap gap-4 w-full md:w-auto">
+                            {/* Search */}
+                            <div className="relative group">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-orange-400 transition-colors" size={14} />
+                                <input
+                                    type="text"
+                                    placeholder="Order ID or Product..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full md:w-64 rounded-xl border border-white/10 bg-slate-950/50 pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 transition-all outline-none"
+                                />
                             </div>
 
-                            <div>
-                                <p className="mb-1 text-[11px] text-slate-400">Region</p>
-                                <select
-                                    value={region}
-                                    onChange={(e) => setRegion(e.target.value)}
-                                    className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-100 outline-none focus:border-orange-400"
-                                >
-                                    <option>All</option>
-                                    {uniqueRegions.map(r => <option key={r}>{r}</option>)}
-                                </select>
-                            </div>
-
-                            <div>
-                                <p className="mb-1 text-[11px] text-slate-400">Status</p>
-                                <select
-                                    value={status}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                    className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-100 outline-none focus:border-orange-400"
-                                >
-                                    <option>All</option>
-                                    <option>Open</option>
-                                    <option>Completed</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <p className="mb-1 text-[11px] text-slate-400">Due date</p>
+                            {/* Date Range */}
+                            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-950/50 px-3 py-1.5">
+                                <Calendar size={14} className="text-slate-500" />
                                 <input
                                     type="date"
-                                    value={dueDate}
-                                    onChange={(e) => setDueDate(e.target.value)}
-                                    className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-100 outline-none focus:border-orange-400"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="bg-transparent text-xs text-white outline-none [&::-webkit-calendar-picker-indicator]:invert"
                                 />
+                                <span className="text-slate-500">-</span>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="bg-transparent text-xs text-white outline-none [&::-webkit-calendar-picker-indicator]:invert"
+                                />
+                            </div>
+
+                            {/* Dropdowns */}
+                            <div className="flex gap-2">
+                                {[
+                                    { label: "Customer", value: customer, setter: setCustomer, options: uniqueCustomers },
+                                    { label: "Region", value: region, setter: setRegion, options: uniqueRegions },
+                                    { label: "Status", value: status, setter: setStatus, options: ["Open", "In Progress", "Completed", "On Hold", "Cancelled", "Returned"] },
+                                ].map((filter) => (
+                                    <div key={filter.label} className="relative">
+                                        <select
+                                            value={filter.value}
+                                            onChange={(e) => filter.setter(e.target.value)}
+                                            className="appearance-none rounded-xl border border-white/10 bg-slate-950/50 pl-3 pr-8 py-2.5 text-xs text-white outline-none focus:border-orange-500/50 transition-all cursor-pointer hover:bg-slate-900"
+                                        >
+                                            <option>All</option>
+                                            {filter.options.map(opt => <option key={opt}>{opt}</option>)}
+                                        </select>
+                                        <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={12} />
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-2 text-[11px]">
+                        <div className="flex items-center gap-2">
                             <button
                                 onClick={() => {
+                                    setSearchQuery("");
                                     setCustomer("All");
                                     setRegion("All");
                                     setStatus("All");
-                                    setDueDate("");
+                                    setStartDate("");
+                                    setEndDate("");
                                 }}
-                                className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-slate-200 hover:border-orange-500 hover:text-orange-300"
+                                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-medium text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
                             >
-                                Clear filters
+                                Clear
                             </button>
                             <button
                                 onClick={() => exportToCSV(orders, "orders_data")}
-                                className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-slate-200 hover:border-orange-500 hover:text-orange-300"
+                                className="flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-bold text-white hover:bg-orange-400 transition-colors shadow-lg shadow-orange-500/20"
                             >
+                                <Download size={14} />
                                 Export CSV
                             </button>
                         </div>
@@ -159,127 +203,163 @@ const Orders: React.FC = () => {
             </section>
 
             {/* Charts */}
-            <section className="bg-slate-950 px-4 py-8">
-                <div className="mx-auto max-w-6xl grid gap-6 md:grid-cols-2">
-                    {/* Status Distribution */}
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div className="mb-3 flex items-center justify-between text-[11px] text-slate-400">
-                            <span>Order Status Distribution</span>
-                            <span>Filtered View</span>
-                        </div>
-                        <div className="h-48 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={statusData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={40}
-                                        outerRadius={60}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {statusData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={STATUS_COLORS[index % STATUS_COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: "#1e293b", borderColor: "#334155", color: "#f1f5f9" }}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div className="flex justify-center gap-4 mt-2">
-                            {statusData.map((entry, index) => (
-                                <div key={entry.name} className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: STATUS_COLORS[index] }} />
-                                    <span className="text-xs text-slate-400">{entry.name}: {entry.value}</span>
-                                </div>
-                            ))}
+            <section className="grid gap-6 md:grid-cols-2">
+                {/* Status Distribution */}
+                <div className="rounded-3xl border border-white/10 bg-slate-900/50 p-6 backdrop-blur-xl">
+                    <div className="mb-6 flex items-center justify-between">
+                        <h3 className="text-sm font-bold text-white">Order Status</h3>
+                        <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">Distribution</span>
+                    </div>
+                    <div className="h-48 w-full flex items-center justify-center">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={statusData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                    stroke="none"
+                                >
+                                    {statusData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: "#0f172a", borderColor: "rgba(255,255,255,0.1)", color: "#f1f5f9", borderRadius: "8px" }}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <div className="absolute flex flex-col items-center justify-center pointer-events-none">
+                            <span className="text-2xl font-bold text-white">{totalOrders}</span>
+                            <span className="text-[10px] text-slate-500 uppercase tracking-wider">Total</span>
                         </div>
                     </div>
+                    <div className="flex justify-center gap-6 mt-4">
+                        {statusData.map((entry, index) => (
+                            <div key={entry.name} className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                                <span className="text-xs font-medium text-slate-300">{entry.name}: <span className="text-white">{entry.value}</span></span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
-                    {/* Region-wise Orders */}
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div className="mb-3 flex items-center justify-between text-[11px] text-slate-400">
-                            <span>Orders by Region</span>
-                            <span>Filtered View</span>
-                        </div>
-                        <div className="h-48 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={regionData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-                                    <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-                                    <Tooltip
-                                        cursor={{ fill: '#334155', opacity: 0.2 }}
-                                        contentStyle={{ backgroundColor: "#1e293b", borderColor: "#334155", color: "#f1f5f9" }}
-                                    />
-                                    <Bar dataKey="orders" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
+                {/* Region-wise Orders */}
+                <div className="rounded-3xl border border-white/10 bg-slate-900/50 p-6 backdrop-blur-xl">
+                    <div className="mb-6 flex items-center justify-between">
+                        <h3 className="text-sm font-bold text-white">Orders by Region</h3>
+                        <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">Volume</span>
+                    </div>
+                    <div className="h-48 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={regionData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.5} />
+                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} dy={10} />
+                                <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} dx={-10} />
+                                <Tooltip
+                                    cursor={{ fill: '#ffffff', opacity: 0.05 }}
+                                    contentStyle={{ backgroundColor: "#0f172a", borderColor: "rgba(255,255,255,0.1)", color: "#f1f5f9", borderRadius: "8px" }}
+                                />
+                                <Bar dataKey="orders" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
             </section>
 
             {/* Orders Table */}
-            <section className="bg-slate-950 px-4 pb-12">
-                <div className="mx-auto max-w-6xl">
-                    <h2 className="mb-3 text-sm font-semibold text-slate-50">
-                        Order Details
-                    </h2>
-                    <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/60">
-                        <table className="min-w-full text-[11px]">
-                            <thead className="bg-slate-900/90 text-slate-300">
+            <section className="rounded-3xl border border-white/10 bg-slate-900/50 overflow-hidden backdrop-blur-xl">
+                <div className="p-6 border-b border-white/5 flex justify-between items-center">
+                    <h2 className="text-sm font-bold text-white">Order Details</h2>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-400">Rows:</span>
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                            className="bg-slate-950 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-slate-300 outline-none focus:border-orange-500"
+                        >
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs text-slate-400">
+                        <thead className="bg-white/5 text-slate-200 font-medium uppercase tracking-wider">
+                            <tr>
+                                <th className="px-6 py-4">Order ID</th>
+                                <th className="px-6 py-4">Customer</th>
+                                <th className="px-6 py-4">Region</th>
+                                <th className="px-6 py-4">Product</th>
+                                <th className="px-6 py-4 text-right">Qty</th>
+                                <th className="px-6 py-4">Booked On</th>
+                                <th className="px-6 py-4">Due Date</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4">Dispatch</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {currentItems.length === 0 ? (
                                 <tr>
-                                    <th className="px-3 py-2 text-left font-medium">Order ID</th>
-                                    <th className="px-3 py-2 text-left font-medium">Customer</th>
-                                    <th className="px-3 py-2 text-left font-medium">Region</th>
-                                    <th className="px-3 py-2 text-left font-medium">Product</th>
-                                    <th className="px-3 py-2 text-right font-medium">Qty</th>
-                                    <th className="px-3 py-2 text-left font-medium">Booked On</th>
-                                    <th className="px-3 py-2 text-left font-medium">Due Date</th>
-                                    <th className="px-3 py-2 text-left font-medium">Status</th>
-                                    <th className="px-3 py-2 text-left font-medium">Dispatch</th>
+                                    <td colSpan={9} className="px-6 py-8 text-center text-slate-500">
+                                        No orders found matching your filters.
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {filteredOrders.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={9} className="px-3 py-4 text-center text-slate-500">
-                                            No orders found.
+                            ) : (
+                                currentItems.map((order) => (
+                                    <tr key={order.id} className="hover:bg-white/5 transition-colors">
+                                        <td className="px-6 py-4 font-mono text-violet-400">{order.orderId}</td>
+                                        <td className="px-6 py-4 font-medium text-white">{order.customer}</td>
+                                        <td className="px-6 py-4">{order.region}</td>
+                                        <td className="px-6 py-4 text-slate-300">{order.product}</td>
+                                        <td className="px-6 py-4 text-right font-bold text-slate-200">{order.orderQty}</td>
+                                        <td className="px-6 py-4 text-slate-500">{new Date(order.bookedOn).toLocaleDateString()}</td>
+                                        <td className="px-6 py-4 text-slate-500">{new Date(order.dueDate).toLocaleDateString()}</td>
+                                        <td className="px-6 py-4">
+                                            <span className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-medium ring-1 ring-inset ${order.status === 'Completed'
+                                                ? 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20'
+                                                : 'bg-orange-500/10 text-orange-400 ring-orange-500/20'
+                                                }`}>
+                                                {order.status}
+                                            </span>
                                         </td>
+                                        <td className="px-6 py-4 text-slate-400">{order.dispatchStatus}</td>
                                     </tr>
-                                ) : (
-                                    filteredOrders.map((order) => (
-                                        <tr
-                                            key={order.id}
-                                            className="hover:bg-slate-900/40 border-b border-slate-800/50 last:border-0"
-                                        >
-                                            <td className="px-3 py-2 align-middle font-mono text-violet-400">{order.orderId}</td>
-                                            <td className="px-3 py-2 align-middle">{order.customer}</td>
-                                            <td className="px-3 py-2 align-middle">{order.region}</td>
-                                            <td className="px-3 py-2 align-middle">{order.product}</td>
-                                            <td className="px-3 py-2 align-middle text-right">{order.orderQty}</td>
-                                            <td className="px-3 py-2 align-middle">{new Date(order.bookedOn).toLocaleDateString()}</td>
-                                            <td className="px-3 py-2 align-middle">{new Date(order.dueDate).toLocaleDateString()}</td>
-                                            <td className="px-3 py-2 align-middle">
-                                                <span className={`px-2 py-0.5 rounded-full text-[10px] ${order.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-orange-500/10 text-orange-400'
-                                                    }`}>
-                                                    {order.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-3 py-2 align-middle text-slate-400">{order.dispatchStatus}</td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between border-t border-white/5 px-6 py-4">
+                    <div className="text-xs text-slate-500">
+                        Showing <span className="font-medium text-white">{currentItems.length > 0 ? indexOfFirstItem + 1 : 0}</span> to <span className="font-medium text-white">{Math.min(indexOfLastItem, filteredOrders.length)}</span> of <span className="font-medium text-white">{filteredOrders.length}</span> results
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="flex items-center justify-center rounded-lg border border-white/10 bg-white/5 p-2 text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages || totalPages === 0}
+                            className="flex items-center justify-center rounded-lg border border-white/10 bg-white/5 p-2 text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight size={16} />
+                        </button>
                     </div>
                 </div>
             </section>
-        </div>
+        </div >
     );
 };
 

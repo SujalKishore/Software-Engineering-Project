@@ -1,26 +1,77 @@
-import React from "react";
+"use client";
+import React, { useEffect, useRef } from "react";
+import AnimatedSection from "../ui/AnimatedSection";
 
 const DocsHero: React.FC = () => {
-  return (
-    <section className="relative overflow-hidden bg-slate-950 text-white">
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-slate-900 to-slate-950" />
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-      <div className="relative mx-auto max-w-6xl px-4 py-14 md:py-18">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-300">
-          Project Documentation
-        </p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-          Brake Manufacturing Dashboard · Docs
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const columns = Math.floor(canvas.width / 20);
+    const drops: number[] = [];
+    for (let i = 0; i < columns; i++) {
+      drops[i] = 1;
+    }
+
+    const draw = () => {
+      ctx.fillStyle = "rgba(2, 6, 23, 0.1)"; // slate-950 with fade
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#f97316"; // orange-500
+      ctx.font = "15px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = String.fromCharCode(Math.floor(Math.random() * 128));
+        ctx.fillText(text, i * 20, drops[i] * 20);
+
+        if (drops[i] * 20 > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    };
+
+    const interval = setInterval(draw, 50);
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  return (
+    <section className="relative overflow-hidden bg-slate-950 text-white h-[60vh] flex items-center justify-center">
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 opacity-20"
+      />
+
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/50 via-transparent to-slate-950" />
+
+      <AnimatedSection className="relative z-10 mx-auto max-w-4xl px-4 text-center">
+        <div className="inline-block rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 text-sm font-medium text-orange-400 mb-6 backdrop-blur-md">
+          Technical Documentation
+        </div>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
+          System Architecture & Specs
         </h1>
-        <p className="mt-3 max-w-2xl text-sm text-slate-300 sm:text-base">
-          Central place for the project&apos;s SRS summary, data model,
-          wireframes, and tech stack. Use this page during{" "}
-          <span className="font-semibold text-orange-200">
-            viva / presentation
-          </span>{" "}
-          to walk evaluators through the system.
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400">
+          Deep dive into the data models, API endpoints, and design decisions powering the Brake Manufacturing Analytics Platform.
         </p>
-      </div>
+      </AnimatedSection>
     </section>
   );
 };

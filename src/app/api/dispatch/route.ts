@@ -1,12 +1,24 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/lib/auth";
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        const records = await prisma.dispatchRecord.findMany({
-            orderBy: { updatedAt: "desc" },
-        });
-        return NextResponse.json(records);
+        const { searchParams } = new URL(request.url);
+        const limit = parseInt(searchParams.get("limit") || "20");
+        const offset = parseInt(searchParams.get("offset") || "0");
+
+        const [records, total] = await Promise.all([
+            prisma.dispatchRecord.findMany({
+                take: limit,
+                skip: offset,
+                orderBy: { updatedAt: "desc" },
+            }),
+            prisma.dispatchRecord.count(),
+        ]);
+
+        return NextResponse.json({ data: records, total });
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch dispatch records" }, { status: 500 });
     }
@@ -14,7 +26,23 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
+        const session = await getServerSession(authOptions);
+        const userRole = (session?.user as any)?.role;
         const body = await request.json();
+
+        // If not admin, create pending request
+        if (userRole !== "admin") {
+            const pendingRequest = await prisma.pendingRequest.create({
+                data: {
+                    type: "CREATE",
+                    entity: "DispatchRecord",
+                    data: JSON.stringify(body),
+                    requestedBy: session?.user?.email || "Unknown",
+                },
+            });
+            return NextResponse.json({ message: "Request submitted for approval", pending: true, id: pendingRequest.id });
+        }
+
         const record = await prisma.dispatchRecord.create({
             data: {
                 lrNo: body.lrNo,
@@ -36,7 +64,23 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
     try {
+        const session = await getServerSession(authOptions);
+        const userRole = (session?.user as any)?.role;
         const body = await request.json();
+
+        // If not admin, create pending request
+        if (userRole !== "admin") {
+            const pendingRequest = await prisma.pendingRequest.create({
+                data: {
+                    type: "UPDATE",
+                    entity: "DispatchRecord",
+                    data: JSON.stringify(body),
+                    requestedBy: session?.user?.email || "Unknown",
+                },
+            });
+            return NextResponse.json({ message: "Update request submitted for approval", pending: true, id: pendingRequest.id });
+        }
+
         const record = await prisma.dispatchRecord.update({
             where: { id: body.id },
             data: {
@@ -59,11 +103,26 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
     try {
+        const session = await getServerSession(authOptions);
+        const userRole = (session?.user as any)?.role;
         const { searchParams } = new URL(request.url);
         const id = searchParams.get("id");
 
         if (!id) {
             return NextResponse.json({ error: "ID required" }, { status: 400 });
+        }
+
+        // If not admin, create pending request
+        if (userRole !== "admin") {
+            const pendingRequest = await prisma.pendingRequest.create({
+                data: {
+                    type: "DELETE",
+                    entity: "DispatchRecord",
+                    data: JSON.stringify({ id }),
+                    requestedBy: session?.user?.email || "Unknown",
+                },
+            });
+            return NextResponse.json({ message: "Delete request submitted for approval", pending: true, id: pendingRequest.id });
         }
 
         await prisma.dispatchRecord.delete({

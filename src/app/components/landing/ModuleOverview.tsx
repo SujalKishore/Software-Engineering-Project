@@ -1,116 +1,129 @@
-import React from "react";
+"use client";
+import React, { useRef } from "react";
+import { useScroll, useTransform, motion, useMotionValueEvent } from "framer-motion";
+import { Activity, Trash2, Package, ShoppingCart, Truck } from "lucide-react";
 
-type ModuleInfo = {
-  id: string;
-  title: string;
-  description: string;
-  kpiExamples: string[];
-};
-
-const modules: ModuleInfo[] = [
+const content = [
   {
-    id: "dailyProduction",
-    title: "Daily Production",
+    title: "Production Analytics",
     description:
-      "Track units produced per line, shift, and product type. Compare current output against targets.",
-    kpiExamples: ["Units per shift", "OEE%", "Downtime minutes"],
+      "Track daily output, efficiency (OEE), and downtime in real-time. Visualize production trends across different lines and shifts to identify bottlenecks instantly.",
+    content: (
+      <div className="h-full w-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white">
+        <Activity size={80} />
+      </div>
+    ),
   },
   {
-    id: "scrapPercentage",
-    title: "Scrap Percentage",
+    title: "Scrap & Quality",
     description:
-      "Monitor scrap rates and defect types across lines to identify problem areas early.",
-    kpiExamples: ["Scrap % by line", "Top 5 defects", "Rework count"],
+      "Monitor rejection rates and identify top defect causes. Analyze scrap data by product, machine, or operator to implement targeted quality improvements.",
+    content: (
+      <div className="h-full w-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center text-white">
+        <Trash2 size={80} />
+      </div>
+    ),
   },
   {
-    id: "customerOrders",
-    title: "Customer Orders",
+    title: "Inventory Management",
     description:
-      "Visualize open orders, committed dates, and dispatch status to avoid delays and penalties.",
-    kpiExamples: ["On-time delivery %", "Open orders", "Backlog quantity"],
+      "Keep track of raw materials and finished goods. Set low-stock alerts and monitor aging inventory to optimize stock levels and reduce carrying costs.",
+    content: (
+      <div className="h-full w-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white">
+        <Package size={80} />
+      </div>
+    ),
   },
   {
-    id: "inventoryLevels",
-    title: "Inventory Levels",
+    title: "Order Fulfillment",
     description:
-      "Keep track of raw materials, WIP, and finished goods to balance stockouts vs. overstock.",
-    kpiExamples: ["Days of inventory", "Fast/slow movers", "ABC categories"],
+      "Track customer orders from placement to delivery. Monitor on-time delivery rates and backlog status to ensure customer satisfaction.",
+    content: (
+      <div className="h-full w-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white">
+        <ShoppingCart size={80} />
+      </div>
+    ),
   },
   {
-    id: "dispatch",
-    title: "Dispatch",
+    title: "Dispatch & Logistics",
     description:
-      "Monitor dispatch performance by customer, region, and transporter to ensure smooth logistics.",
-    kpiExamples: [
-      "Dispatch cycle time",
-      "Truck utilization",
-      "Region-wise volume",
-    ],
+      "Manage vehicle tracking, shipment planning, and transport costs. Optimize routes and ensure timely dispatch of finished goods.",
+    content: (
+      <div className="h-full w-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white">
+        <Truck size={80} />
+      </div>
+    ),
   },
 ];
 
 const ModuleOverview: React.FC = () => {
+  const [activeCard, setActiveCard] = React.useState(0);
+  const ref = useRef<any>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  const cardLength = content.length;
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const cardsBreakpoints = content.map((_, index) => index / cardLength);
+    const closestBreakpointIndex = cardsBreakpoints.reduce(
+      (acc, breakpoint, index) => {
+        const distance = Math.abs(latest - breakpoint);
+        if (distance < Math.abs(latest - cardsBreakpoints[acc])) {
+          return index;
+        }
+        return acc;
+      },
+      0
+    );
+    setActiveCard(closestBreakpointIndex);
+  });
+
   return (
     <section
-      id="modules"
-      className="bg-slate-950 px-4 py-12 text-slate-50 md:py-16"
+      ref={ref}
+      className="h-[300vh] bg-slate-950 relative flex justify-center space-x-20 p-10"
     >
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              Dashboard Modules
-            </h2>
-            <p className="mt-1 max-w-xl text-sm text-slate-300">
-              Each module gets its own dashboard page with charts, tables, and
-              drill-down analysis. You can build these in{" "}
-              <span className="font-semibold text-orange-300">
-                Power BI / Tableau / Google Data Studio
-              </span>
-              .
-            </p>
-          </div>
-
-          <p className="text-xs text-slate-400">
-            Tip: Use a shared navigation bar across all dashboards so users can
-            switch modules quickly.
-          </p>
-        </header>
-
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {modules.map((module) => (
-            <article
-              key={module.id}
-              className="group flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/70 p-4 transition hover:-translate-y-1 hover:border-orange-500/60 hover:bg-slate-900"
-            >
-              <div>
-                <h3 className="text-base font-semibold text-slate-50">
-                  {module.title}
-                </h3>
-                <p className="mt-2 text-xs text-slate-300">
-                  {module.description}
-                </p>
-              </div>
-
-              <div className="mt-3 border-t border-slate-800 pt-3">
-                <p className="text-[11px] font-medium text-slate-400">
-                  Example KPIs
-                </p>
-                <ul className="mt-1 space-y-1 text-[11px] text-slate-200">
-                  {module.kpiExamples.map((kpi) => (
-                    <li
-                      key={kpi}
-                      className="flex items-center gap-2 text-[11px]"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
-                      <span>{kpi}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </article>
+      <div className="div relative flex items-start px-4">
+        <div className="max-w-2xl">
+          {content.map((item, index) => (
+            <div key={item.title + index} className="my-20 min-h-[40vh]">
+              <motion.h2
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: activeCard === index ? 1 : 0.3,
+                }}
+                className="text-4xl font-bold text-slate-50 mb-6"
+              >
+                {item.title}
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: activeCard === index ? 1 : 0.3,
+                }}
+                className="text-lg text-slate-400 max-w-sm leading-relaxed"
+              >
+                {item.description}
+              </motion.p>
+            </div>
           ))}
+          <div className="h-40" />
         </div>
+      </div>
+      <div
+        className="hidden lg:block h-80 w-[500px] rounded-3xl bg-slate-900 border border-slate-800 sticky top-1/3 overflow-hidden shadow-2xl"
+      >
+        <motion.div
+          animate={{
+            backgroundColor:
+              activeCard % 2 === 0 ? "#0f172a" : "#0f172a", // slate-900
+          }}
+          className="h-full w-full flex items-center justify-center"
+        >
+          {content[activeCard].content}
+        </motion.div>
       </div>
     </section>
   );

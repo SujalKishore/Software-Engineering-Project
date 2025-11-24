@@ -20,10 +20,7 @@ const BrakeDashboardLanding: React.FC = () => {
       <Navbar onScrollToModules={scrollToModules} />
 
       <main>
-        <Hero
-          onGetStartedClick={scrollToModules}
-          onScrollToModules={scrollToModules}
-        />
+        <Hero />
 
         <section ref={modulesRef as any}>
           <ModuleOverview />

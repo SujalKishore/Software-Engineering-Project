@@ -1,0 +1,90 @@
+// This is your Prisma schema file for PRODUCTION,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  email     String?  @unique
+  password  String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InventoryItem {
+  id           String   @id @default(uuid())
+  code         String   @unique
+  name         String
+  type         String
+  category     String
+  location     String
+  stockQty     Float
+  uom          String
+  safetyStock  Float
+  reorderLevel Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Order {
+  id             String   @id @default(uuid())
+  orderId        String   @unique
+  customer       String
+  region         String
+  product        String
+  orderQty       Int
+  bookedOn       DateTime
+  dueDate        DateTime
+  status         String
+  dispatchStatus String   @default("Not Dispatched")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model DispatchRecord {
+  id          Int      @id @default(autoincrement())
+  lrNo        String
+  date        DateTime @default(now())
+  customer    String
+  region      String
+  transporter String
+  truckNo     String
+  route       String
+  cartons     Int
+  status      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProductionRecord {
+  id         Int      @id @default(autoincrement())
+  date       DateTime @default(now())
+  line       String
+  shift      String
+  product    String
+  target     Int
+  actual     Int
+  efficiency Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ScrapRecord {
+  id         Int      @id @default(autoincrement())
+  date       DateTime @default(now())
+  line       String
+  defectType String
+  quantity   Int
+  reason     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

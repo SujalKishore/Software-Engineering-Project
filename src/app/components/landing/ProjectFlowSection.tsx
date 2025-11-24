@@ -1,67 +1,81 @@
 import React from "react";
+import AnimatedSection from "../ui/AnimatedSection";
 
 const steps = [
   {
-    title: "1. Define KPIs",
-    details:
-      "Finalize metrics for daily production, scrap %, orders, inventory, and dispatch with the faculty/industry mentor.",
+    title: "Define KPIs",
+    details: "Collaborate with industry mentors to finalize metrics for production, scrap, and inventory.",
+    icon: "1",
   },
   {
-    title: "2. Design Data Model",
-    details:
-      "Identify tables, relationships, and grain of data (per shift, per day, per line, etc.).",
+    title: "Design Data Model",
+    details: "Structure tables and relationships (Star Schema) to ensure accurate reporting grain.",
+    icon: "2",
   },
   {
-    title: "3. Build Dashboards",
-    details:
-      "Create pages for each module with charts, tables, cards, and drill-downs in Power BI/Tableau/Data Studio.",
+    title: "Build Dashboards",
+    details: "Develop interactive views in Power BI/Tableau with drill-downs and tooltips.",
+    icon: "3",
   },
   {
-    title: "4. Add Interactivity",
-    details:
-      "Add filters, slicers, and navigation buttons so users can explore the data intuitively.",
+    title: "Add Interactivity",
+    details: "Implement slicers, filters, and navigation for a seamless user experience.",
+    icon: "4",
   },
   {
-    title: "5. Test with Users",
-    details:
-      "Share with supervisors or sample users to get feedback and refine visual design.",
+    title: "User Testing",
+    details: "Validate with supervisors, gather feedback, and refine the visual design.",
+    icon: "5",
   },
 ];
 
 const ProjectFlowSection: React.FC = () => {
   return (
-    <section
-      id="flow"
-      className="bg-slate-950 px-4 py-12 text-slate-50 md:py-16"
-    >
-      <div className="mx-auto max-w-6xl">
-        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-          Project Flow
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm text-slate-300">
-          Use this high-level flow as your guideline while building wireframes,
-          mockups, and final dashboards.
-        </p>
+    <section id="flow" className="bg-slate-950 px-6 py-24">
+      <AnimatedSection className="mx-auto max-w-4xl">
+        <div className="mb-16 text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-slate-50 sm:text-4xl">
+            Implementation Roadmap
+          </h2>
+          <p className="mt-4 text-lg text-slate-400">
+            From raw data to actionable insights: our step-by-step process.
+          </p>
+        </div>
 
-        <ol className="mt-6 space-y-4 text-xs text-slate-200">
-          {steps.map((step, idx) => (
-            <li
-              key={step.title}
-              className="flex gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 p-4"
-            >
-              <div className="mt-0.5 h-5 w-5 flex-shrink-0 rounded-full bg-orange-500 text-center text-[11px] font-semibold text-slate-950">
-                {idx + 1}
+        <div className="relative">
+          {/* Vertical Line */}
+          <div className="absolute left-8 top-0 h-full w-px bg-slate-800 md:left-1/2" />
+
+          <div className="space-y-12">
+            {steps.map((step, idx) => (
+              <div
+                key={step.title}
+                className={`relative flex flex-col gap-8 md:flex-row ${idx % 2 === 0 ? "md:flex-row-reverse" : ""
+                  }`}
+              >
+                {/* Timeline Dot */}
+                <div className="absolute left-8 top-0 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-4 border-slate-950 bg-orange-500 text-xs font-bold text-white md:left-1/2">
+                  {step.icon}
+                </div>
+
+                {/* Content */}
+                <div className="ml-16 md:ml-0 md:w-1/2 md:px-8">
+                  <div className={`rounded-2xl border border-slate-800 bg-slate-900/50 p-6 backdrop-blur-sm transition-all hover:border-orange-500/30 ${idx % 2 === 0 ? "md:text-right" : "md:text-left"
+                    }`}>
+                    <h3 className="text-xl font-semibold text-slate-50">
+                      {step.title}
+                    </h3>
+                    <p className="mt-2 text-slate-400">{step.details}</p>
+                  </div>
+                </div>
+
+                {/* Empty space for the other side */}
+                <div className="hidden md:block md:w-1/2" />
               </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-50">
-                  {step.title}
-                </p>
-                <p className="mt-1 text-xs text-slate-300">{step.details}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
+            ))}
+          </div>
+        </div>
+      </AnimatedSection>
     </section>
   );
 };
