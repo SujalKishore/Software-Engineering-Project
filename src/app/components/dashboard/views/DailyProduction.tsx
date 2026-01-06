@@ -11,7 +11,7 @@ import {
     Area,
 } from "recharts";
 import { exportToCSV } from "@/app/utils/csvExport";
-import { Search, Calendar, Filter, Download, ChevronLeft, ChevronRight, ArrowUpRight, Plus, Edit, Trash2, X } from "lucide-react";
+import { Search, Calendar, Filter, Download, ChevronLeft, ChevronRight, ArrowUpRight, Plus, Edit, Trash2, X, BrainCircuit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ProductionRecord {
@@ -428,6 +428,12 @@ const DailyProduction: React.FC = () => {
                                 <th className="px-6 py-4 text-right">Target</th>
                                 <th className="px-6 py-4 text-right">Actual</th>
                                 <th className="px-6 py-4 text-right">Efficiency</th>
+                                <th className="px-6 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-1 text-purple-400">
+                                        <BrainCircuit size={12} />
+                                        AI Score
+                                    </div>
+                                </th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -457,6 +463,12 @@ const DailyProduction: React.FC = () => {
                                                     'bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/20'
                                                 }`}>
                                                 {row.efficiency}%
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            {/* Simulated AI Score */}
+                                            <span className="font-mono text-xs text-purple-400">
+                                                {(0.85 + Math.random() * 0.14).toFixed(2)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">

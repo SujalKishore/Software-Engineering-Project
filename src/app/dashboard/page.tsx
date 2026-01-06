@@ -14,6 +14,7 @@ import Scrap from "../components/dashboard/views/Scrap";
 import Orders from "../components/dashboard/views/Orders";
 import Inventory from "../components/dashboard/views/Inventory";
 import Dispatch from "../components/dashboard/views/Dispatch";
+import ProductionOptimizerView from "../components/genetic-algorithm/ProductionOptimizerView";
 
 export default function DashboardHome() {
   const router = useRouter();
@@ -83,6 +84,13 @@ export default function DashboardHome() {
           description:
             "Track daily dispatch volume, on-time vs delayed shipments, and region-wise dispatch performance for brake shoes & brake pads.",
         };
+      case "ProductionOptimizer":
+        return {
+          breadcrumb: "Dashboard · AI Optimization",
+          title: "Production Efficiency Optimizer",
+          description:
+            "Use AI-driven Genetic Algorithms to find the optimal production parameters (Speed, Temp, Pressure) for maximum efficiency.",
+        };
       default:
         return {
           breadcrumb: "Dashboard",
@@ -108,6 +116,8 @@ export default function DashboardHome() {
         return <Inventory />;
       case "Dispatch":
         return <Dispatch />;
+      case "ProductionOptimizer":
+        return <ProductionOptimizerView />;
       default:
         return <Overview onNavigate={setCurrentView} />;
     }

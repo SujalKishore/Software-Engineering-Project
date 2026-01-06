@@ -13,7 +13,7 @@ import {
     Legend,
 } from "recharts";
 import { exportToCSV } from "@/app/utils/csvExport";
-import { Search, Filter, Download, ChevronLeft, ChevronRight, AlertTriangle, Package, Plus, Edit, Trash2, X } from "lucide-react";
+import { Search, Filter, Download, ChevronLeft, ChevronRight, AlertTriangle, Package, Plus, Edit, Trash2, X, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface InventoryItem {
@@ -415,6 +415,12 @@ const Inventory: React.FC = () => {
                                 <th className="px-6 py-4">Location</th>
                                 <th className="px-6 py-4 text-right">Stock Qty</th>
                                 <th className="px-6 py-4 text-right">Status</th>
+                                <th className="px-6 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-1 text-purple-400">
+                                        <Sparkles size={12} />
+                                        Predictive Demand
+                                    </div>
+                                </th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -446,6 +452,14 @@ const Inventory: React.FC = () => {
                                                 : 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20'
                                                 }`}>
                                                 {row.stockQty <= row.safetyStock ? 'Low Stock' : 'In Stock'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            {/* Simulated AI Prediction */}
+                                            <span className={`inline-flex items-center gap-1 text-xs font-medium ${['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] === 'High' ? 'text-red-400' :
+                                                    ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)] === 'Medium' ? 'text-amber-400' : 'text-emerald-400'
+                                                }`}>
+                                                {['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)]}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">

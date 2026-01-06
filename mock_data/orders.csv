@@ -1,0 +1,11 @@
+orderId,customer,region,product,orderQty,bookedOn,dueDate,status,dispatchStatus
+ORD-2023-001,Acme Corp,North,Widget X,500,2023-10-01,2023-10-15,Closed,Dispatched
+ORD-2023-002,Globex Inc,West,Widget Y,300,2023-10-05,2023-10-20,Open,Not Dispatched
+ORD-2023-003,Soylent Corp,East,Gadget Z,200,2023-10-10,2023-10-25,In Progress,Partial
+ORD-2023-004,Initech,South,Widget X,1000,2023-10-12,2023-11-01,Open,Not Dispatched
+ORD-2023-005,Umbrella Corp,North,Widget Y,400,2023-10-15,2023-10-30,Closed,Dispatched
+ORD-2023-006,Stark Ind,West,Gadget Z,150,2023-10-18,2023-11-05,Open,Not Dispatched
+ORD-2023-007,Wayne Ent,East,Widget X,600,2023-10-20,2023-11-10,In Progress,Not Dispatched
+ORD-2023-008,Cyberdyne,South,Widget Y,250,2023-10-22,2023-11-12,Open,Not Dispatched
+ORD-2023-009,Massive Dynamic,North,Gadget Z,100,2023-10-25,2023-11-15,Open,Not Dispatched
+ORD-2023-010,Hooli,West,Widget X,800,2023-10-26,2023-11-20,Open,Not Dispatched

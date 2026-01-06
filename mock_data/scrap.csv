@@ -1,0 +1,11 @@
+date,line,defectType,quantity,reason
+2023-10-25,Line 1,Dimensional,15,Machine calibration error
+2023-10-25,Line 2,Surface,8,Scratches during handling
+2023-10-26,Line 1,Material,20,Raw material defect
+2023-10-26,Assembly,Assembly,5,Missing component
+2023-10-27,Line 3,Electrical,3,Short circuit test failure
+2023-10-27,Packaging,Packaging,12,Damaged box
+2023-10-28,Line 2,Dimensional,10,Tool wear
+2023-10-28,Line 1,Surface,6,Paint defect
+2023-10-29,Assembly,Functional,4,Failed QC test
+2023-10-29,Line 3,Material,15,Impurity in plastic

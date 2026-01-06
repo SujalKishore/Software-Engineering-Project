@@ -1,0 +1,11 @@
+date,line,shift,product,target,actual,efficiency
+2023-10-25,Line 1,Shift A,Widget X,1000,950,95.0
+2023-10-25,Line 1,Shift B,Widget X,1000,800,80.0
+2023-10-25,Line 2,Shift A,Widget Y,1200,1100,91.7
+2023-10-26,Line 1,Shift A,Widget X,1000,980,98.0
+2023-10-26,Line 3,Shift C,Gadget Z,500,450,90.0
+2023-10-27,Line 2,Shift B,Widget Y,1200,1150,95.8
+2023-10-27,Assembly,Shift A,Final Assembly,2000,1900,95.0
+2023-10-28,Packaging,Shift A,Boxed Unit,5000,4800,96.0
+2023-10-28,Line 1,Shift B,Widget X,1000,850,85.0
+2023-10-29,Line 3,Shift A,Gadget Z,500,490,98.0

@@ -55,6 +55,21 @@ This guide provides step-by-step instructions to host your Next.js application, 
     ssh -i "D:\Software Engineering.pem" ubuntu@<your-ec2-public-ip>
     ```
 
+### Troubleshooting Connection Issues
+**If the command hangs (does nothing) or times out:**
+This usually means the **Security Group (Firewall)** is blocking the connection.
+1.  Go to the AWS EC2 Console.
+2.  Click on **Instances** and select your instance (`Brake-Analytics-Server`).
+3.  Click the **Security** tab (bottom half of the screen).
+4.  Click the **Security Group ID** (starts with `sg-...`).
+5.  Click **Edit inbound rules**.
+6.  Ensure there is a rule with:
+    -   **Type**: SSH
+    -   **Port**: 22
+    -   **Source**: Anywhere-IPv4 (0.0.0.0/0)
+7.  If missing, click **Add rule** and add it. Then click **Save rules**.
+8.  Try connecting again.
+
 ## 3. Environment Setup
 Update packages and install dependencies:
 ```bash
@@ -107,16 +122,35 @@ For free tier, you can install PostgreSQL directly on the EC2 instance.
     Paste your environment variables:
     ```env
     DATABASE_URL="postgresql://se_user:your_secure_password@localhost:5432/se_project_db"
-    NEXTAUTH_URL="http://<your-ec2-public-ip>" # Change to https://your-domain.com later
+    NEXTAUTH_URL="http://<your-ec2-public-ip>" # CRITICAL: Change this to your EC2 IP or Domain! Do NOT use localhost.
     NEXTAUTH_SECRET="generate-a-random-secret"
     GOOGLE_CLIENT_ID="your-google-client-id"
     GOOGLE_CLIENT_SECRET="your-google-client-secret"
     ```
-4.  Generate Prisma Client and Push Schema:
+4.  **CRITICAL**: Update Prisma Schema for Postgres.
+    By default, your project might be set to `sqlite`. You need to change it to `postgresql` on the server.
+    ```bash
+    nano prisma/schema.prisma
+    ```
+    Find the `datasource db` block and change `provider` to `"postgresql"`:
+    ```prisma
+    datasource db {
+      provider = "postgresql" // Change this from "sqlite"
+      url      = env("DATABASE_URL")
+    }
+    ```
+    Press `Ctrl+O`, `Enter` to save, and `Ctrl+X` to exit.
+
+5.  Generate Prisma Client and Push Schema:
     ```bash
     npx prisma generate
     npx prisma db push
     ```
+    *Troubleshooting: If you get "Error validating datasource `db`: the URL must start with the protocol `postgresql://`", check your `.env` file:*
+    ```bash
+    nano .env
+    ```
+    *Ensure `DATABASE_URL` starts exactly with `postgresql://`. If it says `postgres://`, change it to `postgresql://`.*
 5.  Build the application:
     ```bash
     npm run build

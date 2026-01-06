@@ -1,0 +1,11 @@
+lrNo,date,customer,region,transporter,truckNo,route,cartons,status
+LR-1001,2023-10-15,Acme Corp,North,FastTrack,TN-01-AB-1234,Route A,50,Delivered
+LR-1002,2023-10-18,Umbrella Corp,North,Speedy,KA-05-XY-9876,Route B,40,In Transit
+LR-1003,2023-10-20,Soylent Corp,East,QuickShip,MH-12-CD-4567,Route C,20,Pending
+LR-1004,2023-10-22,Globex Inc,West,FastTrack,DL-02-EF-3210,Route D,30,In Transit
+LR-1005,2023-10-25,Initech,South,Speedy,TN-03-GH-6543,Route E,100,Pending
+LR-1006,2023-10-26,Stark Ind,West,QuickShip,KA-01-IJ-0987,Route D,15,Pending
+LR-1007,2023-10-27,Wayne Ent,East,FastTrack,MH-04-KL-7654,Route C,60,Pending
+LR-1008,2023-10-28,Cyberdyne,South,Speedy,DL-05-MN-4321,Route E,25,Pending
+LR-1009,2023-10-29,Massive Dynamic,North,QuickShip,TN-02-OP-8765,Route A,10,Pending
+LR-1010,2023-10-30,Hooli,West,FastTrack,KA-03-QR-5432,Route B,80,Pending

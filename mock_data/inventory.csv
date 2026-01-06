@@ -1,0 +1,11 @@
+code,name,type,category,location,stockQty,uom,safetyStock,reorderLevel
+RM-001,Steel Sheet 2mm,Raw Material,Metals,Warehouse A,5000,kg,1000,2000
+RM-002,Plastic Granules,Raw Material,Plastics,Warehouse B,2500,kg,500,1000
+FG-101,Widget X,Finished Goods,Electronics,Warehouse C,800,pcs,200,400
+FG-102,Widget Y,Finished Goods,Electronics,Warehouse C,600,pcs,150,300
+FG-103,Gadget Z,Finished Goods,Electronics,Warehouse C,300,pcs,100,200
+SP-501,Bearing 6204,Spare Part,Mechanical,Store Room,50,pcs,10,20
+SP-502,Motor 1HP,Spare Part,Electrical,Store Room,5,pcs,2,5
+CN-901,Lubricant Oil,Consumable,Fluids,Maintenance,200,L,50,100
+CN-902,Cleaning Solvent,Consumable,Chemicals,Maintenance,100,L,20,50
+RM-003,Copper Wire,Raw Material,Metals,Warehouse A,1200,kg,300,600

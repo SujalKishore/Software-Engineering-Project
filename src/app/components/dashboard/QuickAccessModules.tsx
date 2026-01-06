@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Factory, Trash2, ShoppingCart, Package, Truck, ArrowUpRight } from "lucide-react";
+import { LayoutDashboard, Factory, Trash2, ShoppingCart, Package, Truck, ArrowUpRight, Zap } from "lucide-react";
 
 interface QuickAccessModulesProps {
   activeView: string;
@@ -63,6 +63,15 @@ const modules = [
     color: "text-indigo-400",
     bg: "bg-indigo-500/10",
     border: "border-indigo-500/20",
+  },
+  {
+    name: "AI Optimizer",
+    view: "ProductionOptimizer",
+    short: "AI Optimizer",
+    icon: Zap,
+    color: "text-purple-400",
+    bg: "bg-purple-500/10",
+    border: "border-purple-500/20",
   },
 ];
 
