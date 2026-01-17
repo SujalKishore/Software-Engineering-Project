@@ -22,7 +22,7 @@ const ProductionOptimizerView: React.FC = () => {
     const [bestGenes, setBestGenes] = useState<number[]>([0, 0, 0, 0]);
     const [bestFitness, setBestFitness] = useState(0);
 
-    const animationRef = useRef<number>();
+    const animationRef = useRef<number | null>(null);
 
     const runStep = () => {
         const result = optimizer.evolve();
@@ -104,8 +104,8 @@ const ProductionOptimizerView: React.FC = () => {
                     <button
                         onClick={toggleSimulation}
                         className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg ${isRunning
-                                ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"
-                                : "bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-500/20"
+                            ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"
+                            : "bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-500/20"
                             }`}
                     >
                         {isRunning ? (
